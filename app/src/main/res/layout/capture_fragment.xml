@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.CaptureFragment"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/capture_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="150dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/camera_capture"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_take_picture"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/angles_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="150dp">
+
+        <com.scanner.rmcode.views.LineView
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.scanner.rmcode.views.LineView
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.scanner.rmcode.views.LineView
+            android:id="@+id/line3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.scanner.rmcode.views.LineView
+            android:id="@+id/line4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/angle1"
+            android:src="@drawable/angle"/>
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/angle2"
+            android:src="@drawable/angle"/>
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/angle3"
+            android:src="@drawable/angle"/>
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/angle4"
+            android:src="@drawable/angle"/>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:id="@+id/angles_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/angles_message"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/angles_ready_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/angles_ready"
+            android:minWidth="170dp"
+            android:background="@drawable/basic_button"
+            android:textColor="#eeffffff"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/try_again_capture_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/try_again"
+            android:minWidth="170dp"
+            android:textColor="#eeffffff"
+            android:background="@drawable/basic_button"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

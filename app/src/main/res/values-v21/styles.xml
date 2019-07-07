@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+
+    <style name="RMLightTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/lightThemeColorPrimary</item>
+        <item name="colorPrimaryDark">@color/lightThemeColorPrimaryDark</item>
+        <item name="colorAccent">@color/lightThemeColorSecondaryDark</item>
+    </style>
+
+    <style name="RMDarkTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/darkThemeColorPrimary</item>
+        <item name="android:windowBackground">@color/darkThemeColorPrimaryLight</item>
+        <item name="android:textColorPrimary">@color/darkThemeColorPrimaryText</item>
+        <item name="android:colorPrimaryDark" tools:targetApi="lollipop">@color/darkThemeColorPrimaryDark</item>
+        <item name="colorAccent">@color/darkThemeColorSecondaryDark</item>
+        <item name="android:toolbarStyle">@style/RMDarkToolbarStyle</item>
+    </style>
+</resources>

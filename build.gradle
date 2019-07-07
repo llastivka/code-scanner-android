@@ -1,0 +1,50 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.4.1'
+        
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+def coreWrapperDir = new File("${projectDir}/src/main/java/com/scanner/rmcode/core")
+
+task createCoreWrapperDir {
+    coreWrapperDir.mkdirs()
+}
+
+// For this to work, it's assumed SWIG is installed
+// TODO: This only works when called from Command Line (gradlew runSwig)
+task runSwig(type:Exec, dependsOn: ['createCoreWrapperDir']) {
+
+    String osName = System.getProperty("os.name").toLowerCase();
+    if (osName.contains("windows")) {
+        workingDir '/src/main/jni'   // This implicitly starts from $(projectDir) evidently
+        commandLine 'cmd', '/c', 'swig'
+        args '-c++', '-java', '-package', 'com.scanner.rmcode.core', '-outdir', coreWrapperDir.absolutePath, 'decoder.i'
+    }
+    else {
+        commandLine 'swig'
+        args '-c++', '-java', '-package', 'com.scanner.rmcode.core', '-outdir', coreWrapperDir.absolutePath, "${projectDir}/src/main/jni/decoder.i"
+    }
+
+}
