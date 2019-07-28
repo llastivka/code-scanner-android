@@ -52,6 +52,10 @@ public class Coder {
     return coder_WrapperJNI.Coder_getModulesNumber(swigCPtr, this);
   }
 
+  public SWIGTYPE_p_cv__Mat encodeStringToMat(String text) {
+    return new SWIGTYPE_p_cv__Mat(coder_WrapperJNI.Coder_encodeStringToMat(swigCPtr, this, text), true);
+  }
+
   public String decodeStringFromMat(SWIGTYPE_p_cv__Mat mat) {
     return coder_WrapperJNI.Coder_decodeStringFromMat(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat));
   }

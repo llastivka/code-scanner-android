@@ -371,6 +371,30 @@ SWIGEXPORT jint JNICALL Java_com_scanner_rmcode_core_coder_1WrapperJNI_Coder_1ge
 }
 
 
+SWIGEXPORT jlong JNICALL Java_com_scanner_rmcode_core_coder_1WrapperJNI_Coder_1encodeStringToMat(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+  jlong jresult = 0 ;
+  Coder *arg1 = (Coder *) 0 ;
+  std::string arg2 ;
+  cv::Mat result;
+  
+  (void)jenv;
+  (void)jcls;
+  (void)jarg1_;
+  arg1 = *(Coder **)&jarg1; 
+  if(!jarg2) {
+    SWIG_JavaThrowException(jenv, SWIG_JavaNullPointerException, "null string");
+    return 0;
+  } 
+  const char *arg2_pstr = (const char *)jenv->GetStringUTFChars(jarg2, 0); 
+  if (!arg2_pstr) return 0;
+  (&arg2)->assign(arg2_pstr);
+  jenv->ReleaseStringUTFChars(jarg2, arg2_pstr); 
+  result = (arg1)->encodeStringToMat(arg2);
+  *(cv::Mat **)&jresult = new cv::Mat((const cv::Mat &)result); 
+  return jresult;
+}
+
+
 SWIGEXPORT jstring JNICALL Java_com_scanner_rmcode_core_coder_1WrapperJNI_Coder_1decodeStringFromMat(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
   jstring jresult = 0 ;
   Coder *arg1 = (Coder *) 0 ;
