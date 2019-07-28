@@ -18,6 +18,11 @@ Coder::color Coder::palette[COLOR_NUMBER] = {
 
 const Coder::color Coder::WHITE = { 255, 255, 255 };
 
+const std::string Coder::HTTP_PROTOCOL = "http://";
+const std::string Coder::HTTPS_PROTOCOL = "https://";
+const std::string Coder::DEFAULT_URL_SHORTENER = "u.nu/";
+const std::string Coder::DEFAULT_LINK_MARKER = ":";
+
 Coder::Coder() {}
 
 Coder::Coder(int modulesNumber)
@@ -75,13 +80,26 @@ int Coder::getDecimalFromBinaryString(string value)
 
 
 //decoding methods
+
+std::string toLowerCase(std::string text)
+{
+	for (int i = 0; text[i] != 0; i++)
+	{
+		if (text[i] <= 'Z' && text[i] >= 'A')
+		{
+			text[i] += 32;
+		}
+	}
+	return text;
+}
+
 string Coder::decode(string bitStream)
 {
  	int length = getDecimalFromBinaryString(bitStream.substr(0, SHORT_BIT_NUM));
 	if (length > 40) //for now it is hard coded
 	{
 		std::cout << "Decoding error! Length of the encoded message can not be " << length << endl;
-		return "ERROR";
+		return "";
 	}
 	int currentPosition = SHORT_BIT_NUM;
 	string decoded = "";
@@ -113,10 +131,10 @@ string Coder::decode(string bitStream)
 		}
 		i++;
 	}
+	
 	/*
 	vector<int> errorCorrectionCodeword;
-	int errorCorrectionLength = BYTE_BIT_NUM * getErrorCorrector().getLengthOfCodeword();
-	string errorCorrection = bitStream.substr(currentPosition, errorCorrectionLength);
+	string errorCorrection = bitStream.substr(currentPosition, length);
 	currentPosition = 0;
 	for (int i = 0; i < getErrorCorrector().getLengthOfCodeword(); i++)
 	{
@@ -126,20 +144,19 @@ string Coder::decode(string bitStream)
 	}
 	*/
 
-	/*if (!checkErrorCorrection(decoded, errorCorrectionCodeword))
-	{
-	std::cout << "Error correction check failed";
-	return "";
-	}*/
+	if (isLink(decoded)) {
+		decoded = decoded.substr(1, length);
+		decoded = HTTPS_PROTOCOL + DEFAULT_URL_SHORTENER + decoded;
+		decoded = toLowerCase(decoded);
+	}
 
 	return decoded;
 }
-/*
-bool Coder::checkErrorCorrection(string message, vector<int> codeword)
+
+bool Coder::isLink(string decoded)
 {
-	return getErrorCorrector().decode(message, codeword);
+	return decoded.find(Coder::DEFAULT_LINK_MARKER) != std::string::npos;
 }
-*/
 
 int Coder::getPaletteIndex(std::vector<Coder::color> palette, std::vector<vector<double>> paletteBgrProportions, Coder::color currentColor)
 {
@@ -430,10 +447,6 @@ cv::Mat Coder::perspectiveTransform(cv::Mat input)
 	//cv::imwrite("anglesFromImage_AfterGray.png", grayMat);
 
     vector<cv::Point2f> inputQuad = getAnglesFromImage(input, grayMat);
-    if (inputQuad.empty()) {
-        cv::Mat emptyMat;
-        return emptyMat;
-    }
 	//cv::imwrite("circled.png", input);
 	return perspectiveTransform(input, inputQuad);
 }
@@ -466,11 +479,6 @@ vector<cv::Point2f> Coder::getAnglesFromImage(cv::Mat image, cv::Mat imageGray)
 	vector<vector<cv::Point>> contours; // Vector for storing contour
 	vector<cv::Vec4i> hierarchy;
 	findContours(imageGray, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE); // Find the contours in the image
-
-	if (contours.size() < 4)
-	{
-	    return inputQuad;
-	}
 
 	vector<double> largestArea = { 0, 0, 0, 0 };
 	vector<int> largestContourIndexes = { 0, 0, 0, 0 };
@@ -648,9 +656,45 @@ std::string Coder::decodeStringFromMat(cv::Mat mat)
 
 
 //encoding methods
+
+bool Coder::isURL(string text) {
+	return text.find(Coder::HTTP_PROTOCOL) != std::string::npos || text.find(Coder::HTTPS_PROTOCOL) != std::string::npos || text.find(Coder::DEFAULT_URL_SHORTENER) != std::string::npos;
+}
+
+std::string toUpperCase(std::string text)
+{
+	for (int i = 0; text[i] != 0; i++)
+	{
+		if (text[i] <= 'z' && text[i] >= 'a')
+		{
+			text[i] -= 32;
+		}
+	}
+	return text;
+}
+
+std::string getStringInReversedOrder(std::string str) {
+	std::string reversed = "";
+	for (int i = str.length() - 1; i >= 0; --i) {
+		reversed += str[i];
+	}
+	return reversed;
+}
+
 std::string Coder::encode(std::string text)
 {
+	if (isURL(text)) {
+		std:string delimiter = "/";
+		size_t pos = 0;
+		while ((pos = text.find(delimiter)) != std::string::npos) {
+			text.erase(0, pos + delimiter.length());
+		}
+		text = toUpperCase(text);
+		text = DEFAULT_LINK_MARKER + text;
+	}
+
 	string encoded = getBinaryAsString(text.size()).substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM); //only 6 bits needed bc max number of encoded bits is 35
+	string encodedMessageOnly = "";
 	for (int i = 0; i < text.size(); i++)
 	{
 		if (i != text.size() - 1)
@@ -659,7 +703,9 @@ std::string Coder::encode(std::string text)
 			cout << "pairFirst: " << pairFirst << endl;
 			int pairSecond = encodingAlphanumericValuesMap.find(text[++i])->second;
 			cout << "pairSecond: " << pairSecond << endl;
-			encoded.append(getBinaryAsString(45 * pairFirst + pairSecond));
+			string encodedPair = getBinaryAsString(45 * pairFirst + pairSecond);
+			encoded.append(encodedPair);
+			encodedMessageOnly.append(encodedPair);
 			cout << "encoded together: " << getBinaryAsString(45 * pairFirst + pairSecond) << endl;
 		}
 		else
@@ -670,21 +716,22 @@ std::string Coder::encode(std::string text)
 			encoded.append(binary.substr(BIT_NUM - SHORT_BIT_NUM, SHORT_BIT_NUM));
 		}
 	}
-/*
-	string errorCorrectionEncoded = encodeErrorCorrectionCodeword(getErrorCorrector().encode(text));
+
+	//error correction (kinda)
 	int neededLength = (getModulesNumber() - PALETTE_NUM - ANGLES_NUM) * BITS_IN_MODULE;
 	do {
-		if (neededLength - encoded.size() >= errorCorrectionEncoded.size())
+		encodedMessageOnly = getStringInReversedOrder(encodedMessageOnly);
+		if (neededLength - encoded.size() >= encodedMessageOnly.size())
 		{
-			encoded.append(errorCorrectionEncoded);
+			encoded.append(encodedMessageOnly);
 		}
 		else
 		{
-			int leftoverSpaceLength = errorCorrectionEncoded.size() - (neededLength - encoded.size());
-			encoded.append(errorCorrectionEncoded.substr(0, leftoverSpaceLength));
+			int leftoverSpaceLength = encodedMessageOnly.size() - (neededLength - encoded.size());
+			encoded.append(encodedMessageOnly.substr(0, leftoverSpaceLength));
 		}
 	} while (encoded.size() < neededLength);
-	*/
+	
 	return encoded;
 }
 
@@ -750,4 +797,10 @@ cv::Mat Coder::create2DCode(string bitString)
 		}
 	}
 	return image;
+}
+
+cv::Mat Coder::encodeStringToMat(std::string text)
+{
+	string encoded = encode(text);
+	return create2DCode(encoded);
 }

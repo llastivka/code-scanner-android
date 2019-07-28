@@ -101,10 +101,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateToBrowser(String result) {
-        String url = result;
-        url = (!result.startsWith("http://") && !result.startsWith("https://")) ? "http://" + url : url;
+        String url= result;
+        if (isLink(result)) {
+            url = (!result.startsWith("http://") && !result.startsWith("https://")) ? "http://" + url : url;
+        } else {
+            url = "https://www.google.com/search?q=" + url;
+        }
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browserIntent);
+    }
+
+    public boolean isLink(String text) {
+        return text.contains("http://") || text.contains("https://") || text.contains("u.nu/");
     }
 
     public int getDpMeasure(Context context, int dp) {

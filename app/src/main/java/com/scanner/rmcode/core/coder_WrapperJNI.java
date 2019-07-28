@@ -13,6 +13,7 @@ public class coder_WrapperJNI {
   public final static native long new_Coder__SWIG_1(int jarg1);
   public final static native void Coder_setModulesNumber(long jarg1, Coder jarg1_, int jarg2);
   public final static native int Coder_getModulesNumber(long jarg1, Coder jarg1_);
+  public final static native long Coder_encodeStringToMat(long jarg1, Coder jarg1_, String jarg2);
   public final static native String Coder_decodeStringFromMat(long jarg1, Coder jarg1_, long jarg2);
   public final static native void delete_Coder(long jarg1);
   public final static native long new_StringVector__SWIG_0();
