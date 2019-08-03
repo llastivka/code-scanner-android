@@ -191,7 +191,7 @@ public class CaptureFragment extends Fragment {
 
         int modulesNumber = 49;
         Coder decoder = new com.scanner.rmcode.core.Coder(modulesNumber);
-        SWIGTYPE_p_cv__Mat swigMat = new SWIGTYPE_p_cv__Mat(mat.getNativeObjAddr(), false);
+        SWIGTYPE_p_cv__Mat swigMat = new SWIGTYPE_p_cv__Mat(img.getNativeObjAddr(), false);
         String tmpResult = decoder.decodeStringFromMat(swigMat);
 
         //that was for testing
@@ -210,10 +210,12 @@ public class CaptureFragment extends Fragment {
 //        String tmpResult = "http://www.pja.edu.pl/en/news/student-pjatk-zwyciezca-w-hackathonie-hackyeah";
         if (tmpResult != null && !tmpResult.isEmpty() && !tmpResult.contains("ERROR")) {
             insertResultRecordToDataBase(tmpResult);
-            String autoNavPrefName = mContext.getResources().getString(R.string.auto_nav_pref_name);
-            boolean autoNavigation = ((MainActivity) mFragmentActivity).getPreferences().getBoolean(autoNavPrefName, false);
-            if (autoNavigation) {
-                ((MainActivity) mFragmentActivity).navigateToBrowser(tmpResult);
+            if (((MainActivity) mFragmentActivity).isLink(tmpResult)) {
+                String autoNavPrefName = mContext.getResources().getString(R.string.auto_nav_pref_name);
+                boolean autoNavigation = ((MainActivity) mFragmentActivity).getPreferences().getBoolean(autoNavPrefName, false);
+                if (autoNavigation) {
+                    ((MainActivity) mFragmentActivity).navigateToBrowser(tmpResult);
+                }
             }
         }
 

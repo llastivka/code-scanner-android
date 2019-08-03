@@ -24,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String ID_COLUMN = "ID";
     private static final String DATE_COLUMN = "DATE";
     private static final String RESULT_COLUMN = "RESULT";
+    private static final String NOTES_COLUMN = "NOTES";
 
 
     public DatabaseHelper(Context context) {
@@ -32,7 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, RESULT TEXT)");
+        db.execSQL("CREATE TABLE " + TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, RESULT TEXT, NOTES TEXT)");
     }
 
     @Override
@@ -57,11 +58,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<HistoryRecord> historyList = new ArrayList<>();
         if (cursor.getCount() != 0){
             while (cursor.moveToNext()) {
-                historyList.add(new HistoryRecord(cursor.getInt(0), cursor.getString(1), cursor.getString(2)));
+                historyList.add(new HistoryRecord(cursor.getInt(0), cursor.getString(1),
+                        cursor.getString(2), cursor.getString(3)));
             }
         } else {
             logger.info("No records returned from database");
         }
         return historyList;
+    }
+
+    public boolean addNotes(Integer id, String notes) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NOTES_COLUMN, notes);
+        long res = db.update(TABLE_NAME, contentValues, ID_COLUMN + "=" + id, null);
+        return res != -1;
+    }
+
+    public boolean deleteSpecificRecords(List<Integer> ids) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean allSuccesfull = true;
+        for (Integer id : ids) {
+            long res = db.delete(TABLE_NAME, ID_COLUMN + "=" + id, null);
+            if (res == -1) {
+                allSuccesfull = false;
+            }
+        }
+        return allSuccesfull;
+    }
+
+    public boolean deleteSpecificRecord(Integer id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        long res = db.delete(TABLE_NAME, ID_COLUMN + "=" + id, null);
+        return res != -1;
+    }
+
+    public boolean deleteAllRecords() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        long res = db.delete(TABLE_NAME, null, null);
+        return res != -1;
     }
 }

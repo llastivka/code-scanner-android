@@ -16,12 +16,16 @@
     <string name="id_header">Id</string>
     <string name="date_header">Date</string>
     <string name="message_header">Message</string>
+    <string name="edit_header">Edit</string>
 
     <string name="automatic_navigation">Automatic navigation</string>
     <string name="themes">Themes:</string>
     <string name="dark_theme">Dark theme</string>
     <string name="light_theme">Light theme</string>
+
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
 
     <string name="dark_pref">dark</string>
     <string name="light_pref">light</string>
@@ -29,6 +33,10 @@
     <string name="auto_nav_pref_name">autoNav</string>
 
     <string name="copy_toast_message">Result is copied to the clipboard</string>
+
+    <string name="history_edit_date_label">Date:</string>
+    <string name="history_edit_message_label">Decoded message:</string>
+    <string name="history_edit_notes_label">Edit your notes:</string>
 
     <!--content descriptions-->
     <string name="cameraPreviewDescription">Camera preview</string>
