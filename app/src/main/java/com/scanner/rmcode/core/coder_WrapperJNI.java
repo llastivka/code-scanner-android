@@ -15,6 +15,8 @@ public class coder_WrapperJNI {
   public final static native int Coder_getModulesNumber(long jarg1, Coder jarg1_);
   public final static native long Coder_encodeStringToMat(long jarg1, Coder jarg1_, String jarg2);
   public final static native String Coder_decodeStringFromMat(long jarg1, Coder jarg1_, long jarg2);
+  public final static native long Coder_getCorners(long jarg1, Coder jarg1_, long jarg2);
+  public final static native String Coder_decodeStringFromMatWithCorners(long jarg1, Coder jarg1_, long jarg2, long jarg3, IntVector jarg3_);
   public final static native void delete_Coder(long jarg1);
   public final static native long new_StringVector__SWIG_0();
   public final static native long new_StringVector__SWIG_1(long jarg1, StringVector jarg1_);
@@ -31,4 +33,19 @@ public class coder_WrapperJNI {
   public final static native String StringVector_doSet(long jarg1, StringVector jarg1_, int jarg2, String jarg3);
   public final static native void StringVector_doRemoveRange(long jarg1, StringVector jarg1_, int jarg2, int jarg3);
   public final static native void delete_StringVector(long jarg1);
+  public final static native long new_IntVector__SWIG_0();
+  public final static native long new_IntVector__SWIG_1(long jarg1, IntVector jarg1_);
+  public final static native long IntVector_capacity(long jarg1, IntVector jarg1_);
+  public final static native void IntVector_reserve(long jarg1, IntVector jarg1_, long jarg2);
+  public final static native boolean IntVector_isEmpty(long jarg1, IntVector jarg1_);
+  public final static native void IntVector_clear(long jarg1, IntVector jarg1_);
+  public final static native long new_IntVector__SWIG_2(int jarg1, int jarg2);
+  public final static native int IntVector_doSize(long jarg1, IntVector jarg1_);
+  public final static native void IntVector_doAdd__SWIG_0(long jarg1, IntVector jarg1_, int jarg2);
+  public final static native void IntVector_doAdd__SWIG_1(long jarg1, IntVector jarg1_, int jarg2, int jarg3);
+  public final static native int IntVector_doRemove(long jarg1, IntVector jarg1_, int jarg2);
+  public final static native int IntVector_doGet(long jarg1, IntVector jarg1_, int jarg2);
+  public final static native int IntVector_doSet(long jarg1, IntVector jarg1_, int jarg2, int jarg3);
+  public final static native void IntVector_doRemoveRange(long jarg1, IntVector jarg1_, int jarg2, int jarg3);
+  public final static native void delete_IntVector(long jarg1);
 }

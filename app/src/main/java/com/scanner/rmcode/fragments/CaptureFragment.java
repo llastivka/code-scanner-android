@@ -8,9 +8,11 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,6 +34,8 @@ import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -40,6 +44,7 @@ import java.util.logging.Logger;
 
 import com.scanner.rmcode.core.Coder;
 import com.scanner.rmcode.core.SWIGTYPE_p_cv__Mat;
+import com.scanner.rmcode.core.IntVector;
 
 import static org.opencv.imgcodecs.Imgcodecs.CV_LOAD_IMAGE_COLOR;
 
@@ -49,6 +54,10 @@ public class CaptureFragment extends Fragment {
 
     DatabaseHelper historyDB;
 //    Decoder decoder = Decoder.create();
+
+    private static final int MODULES_NUMBER = 49;
+    Coder decoder = new com.scanner.rmcode.core.Coder(MODULES_NUMBER);
+
     private Mat mat;
 
     private Context mContext;
@@ -56,7 +65,7 @@ public class CaptureFragment extends Fragment {
 
     private ViewGroup rootLayout;
     private ImageView angle1, angle2, angle3, angle4;
-    ImageView image;
+    ImageView imageView;
 
     private int xDelta[] = new int[4];
     private int yDelta[] = new int[4];
@@ -71,6 +80,10 @@ public class CaptureFragment extends Fragment {
     private LineView[] lines = new LineView[4];
     private int[] xCoordinates = new int[4];
     private int[] yCoordinates = new int[4];
+
+    private IntVector corners;
+    private int actualMatWidth;
+    private int actualMatHeight;
 
     static {
         System.loadLibrary("coder_Wrapper");
@@ -94,8 +107,7 @@ public class CaptureFragment extends Fragment {
         byte[] resizedByteArray = null;
         if (imageBytes != null) {
             logger.info("Decoding image bytes array into bitmap");
-            mat = Imgcodecs.imdecode(new MatOfByte(imageBytes), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
-            image = view.findViewById(R.id.camera_capture);
+            imageView = view.findViewById(R.id.camera_capture);
 //            I added 2 lines to manifest to avoid this error but still consider some scaling later
 //            BitmapFactory.Options options = new BitmapFactory.Options();
 //            options.inSampleSize = 2;
@@ -112,7 +124,13 @@ public class CaptureFragment extends Fragment {
             //decodedBitmap.recycle();
             //rotatedBitmap.recycle();
             //resized.recycle();
-            image.setImageBitmap(rotatedBitmap);
+
+            //saveImage(resizedByteArray);
+            mat = Imgcodecs.imdecode(new MatOfByte(resizedByteArray), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+            imageView.setImageBitmap(rotatedBitmap);
+
+            setImageCornersAndSize(mat);
+
         } else {
             logger.info("Image bytes array is null");
         }
@@ -152,6 +170,37 @@ public class CaptureFragment extends Fragment {
         return view;
     }
 
+    private void saveImage(byte[] bytes) {
+        File photo = new File(Environment.getExternalStorageDirectory(), "photo.jpg");
+
+        if (photo.exists()) {
+            photo.delete();
+        }
+
+        try {
+            FileOutputStream fos = new FileOutputStream(photo.getPath());
+            fos.write(bytes);
+            fos.close();
+        }
+        catch (java.io.IOException e) {
+            Log.e("PictureDemo", "Exception in photoCallback", e);
+        }
+    }
+
+    private void setImageCornersAndSize(Mat mat) {
+        Mat img = null;
+        try {
+            img = Utils.loadResource(mContext, R.drawable.lena7_real, CV_LOAD_IMAGE_COLOR);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        SWIGTYPE_p_cv__Mat swigMat = new SWIGTYPE_p_cv__Mat(img.getNativeObjAddr(), false);
+        corners = decoder.getCorners(swigMat);
+        actualMatWidth = corners.get(8);
+        actualMatHeight = corners.get(9);
+    }
+
     private void decode(byte[] imageBytes, int rows, int cols) {
         //decoding is happening here
         ByteBuffer.allocateDirect(1000);
@@ -181,6 +230,15 @@ public class CaptureFragment extends Fragment {
 //        String tmpResult = decoder.decode(buffer);
 
 
+        IntVector outCorners = new IntVector();
+        outCorners.add(getOutAngleLocationCoordinate(layoutHeight, actualMatWidth, xCoordinates[0]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutWidth, actualMatHeight, xCoordinates[0]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutHeight, actualMatWidth, xCoordinates[1]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutWidth, actualMatHeight, xCoordinates[1]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutHeight, actualMatWidth, xCoordinates[2]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutWidth, actualMatHeight, xCoordinates[2]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutHeight, actualMatWidth, xCoordinates[3]));
+        outCorners.add(getOutAngleLocationCoordinate(layoutWidth, actualMatHeight, xCoordinates[3]));
 
         Mat img = null;
         try {
@@ -189,16 +247,14 @@ public class CaptureFragment extends Fragment {
             e.printStackTrace();
         }
 
-        int modulesNumber = 49;
-        Coder decoder = new com.scanner.rmcode.core.Coder(modulesNumber);
         SWIGTYPE_p_cv__Mat swigMat = new SWIGTYPE_p_cv__Mat(img.getNativeObjAddr(), false);
-        String tmpResult = decoder.decodeStringFromMat(swigMat);
+        String tmpResult = decoder.decodeStringFromMatWithCorners(swigMat, outCorners);
 
         //that was for testing
 //        Mat matTransformed = new Mat(getCPtr(swigMatResult));
 //        Bitmap bm = Bitmap.createBitmap(matTransformed.cols(), matTransformed.rows(),Bitmap.Config.ARGB_8888);
 //        Utils.matToBitmap(matTransformed, bm);
-//        image.setImageBitmap(bm);
+//        imageView.setImageBitmap(bm);
 
 //        coder_WrapperJNI.new_Coder__SWIG_1(modulesNumber);
 //        coder_WrapperJNI.Coder_decodeStringFromMat(1, decoder, mat.getNativeObjAddr());
@@ -263,28 +319,42 @@ public class CaptureFragment extends Fragment {
                     minTop = 0 - angleSide / 2;
                     maxLeft = layoutWidth - angleSide / 2;
                     maxTop = layoutHeight - angleSide / 2;
+
+                    int angle1X = getAngleLocationCoordinate(layoutHeight, actualMatWidth, corners.get(0));
+                    int angle1Y = getAngleLocationCoordinate(layoutWidth, actualMatHeight, corners.get(1));
+                    int angle2X = getAngleLocationCoordinate(layoutHeight, actualMatWidth, corners.get(2));
+                    int angle2Y = getAngleLocationCoordinate(layoutWidth, actualMatHeight, corners.get(3));
+                    int angle3X = getAngleLocationCoordinate(layoutHeight, actualMatWidth, corners.get(4));
+                    int angle3Y = getAngleLocationCoordinate(layoutWidth, actualMatHeight, corners.get(5));
+                    int angle4X = getAngleLocationCoordinate(layoutHeight, actualMatWidth, corners.get(6));
+                    int angle4Y = getAngleLocationCoordinate(layoutWidth, actualMatHeight, corners.get(7));
+
+                    int shift = angleSide / 2;
                     RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) angle1.getLayoutParams();
-                    layoutParams.setMargins(layoutWidth / 4 - angleSide / 2, layoutHeight / 4 - angleSide / 2, 0, 0);
+                    layoutParams.setMargins(angle1X - shift, angle1Y - shift, 0, 0);
                     angle1.setLayoutParams(layoutParams);
+
                     layoutParams = (RelativeLayout.LayoutParams) angle2.getLayoutParams();
-                    layoutParams.setMargins(layoutWidth / 4 * 3 - angleSide / 2, layoutHeight / 4 - angleSide / 2, 0, 0);
+                    layoutParams.setMargins(angle2X - shift, angle2Y - shift, 0, 0);
                     angle2.setLayoutParams(layoutParams);
-                    layoutParams = (RelativeLayout.LayoutParams) angle4.getLayoutParams();
-                    layoutParams.setMargins(layoutWidth / 4 - angleSide / 2, layoutHeight / 4 * 3 - angleSide / 2, 0, 0);
-                    angle4.setLayoutParams(layoutParams);
+
                     layoutParams = (RelativeLayout.LayoutParams) angle3.getLayoutParams();
-                    layoutParams.setMargins(layoutWidth / 4 * 3 - angleSide / 2, layoutHeight / 4 * 3 - angleSide / 2, 0, 0);
+                    layoutParams.setMargins(angle3X - shift, angle3Y - shift, 0, 0);
                     angle3.setLayoutParams(layoutParams);
 
+                    layoutParams = (RelativeLayout.LayoutParams) angle4.getLayoutParams();
+                    layoutParams.setMargins(angle4X - shift, angle4Y - shift, 0, 0);
+                    angle4.setLayoutParams(layoutParams);
+
                     //setting initial position of lines (left margins basically)
-                    xCoordinates[0] = layoutWidth / 4;
-                    yCoordinates[0] = layoutHeight / 4;
-                    xCoordinates[1] = layoutWidth / 4 * 3;
-                    yCoordinates[1] = layoutHeight / 4;
-                    xCoordinates[2] = layoutWidth / 4 * 3;
-                    yCoordinates[2] = layoutHeight / 4 * 3;
-                    xCoordinates[3] = layoutWidth / 4;
-                    yCoordinates[3] = layoutHeight / 4 * 3;
+                    xCoordinates[0] = angle1X;
+                    yCoordinates[0] = angle1Y;
+                    xCoordinates[1] = angle2X;
+                    yCoordinates[1] = angle2Y;
+                    xCoordinates[2] = angle3X;
+                    yCoordinates[2] = angle3Y;
+                    xCoordinates[3] = angle4X;
+                    yCoordinates[3] = angle4Y;
 
                     lines[0] = view.findViewById(R.id.line1);
                     lines[1] = view.findViewById(R.id.line2);
@@ -304,6 +374,14 @@ public class CaptureFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public int getAngleLocationCoordinate(int layoutSize, int actualImageSize, int cornerOnActualImage) {
+        return (layoutSize * cornerOnActualImage) / actualImageSize;
+    }
+
+    public int getOutAngleLocationCoordinate(int layoutSize, int actualImageSize, int viewCoordinate) {
+        return (viewCoordinate * actualImageSize) / layoutSize;
     }
 
     private final class AnglesTouchListener implements View.OnTouchListener {

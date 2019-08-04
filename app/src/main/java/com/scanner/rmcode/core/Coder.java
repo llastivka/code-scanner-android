@@ -60,4 +60,12 @@ public class Coder {
     return coder_WrapperJNI.Coder_decodeStringFromMat(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat));
   }
 
+  public IntVector getCorners(SWIGTYPE_p_cv__Mat mat) {
+    return new IntVector(coder_WrapperJNI.Coder_getCorners(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat)), true);
+  }
+
+  public String decodeStringFromMatWithCorners(SWIGTYPE_p_cv__Mat mat, IntVector corners) {
+    return coder_WrapperJNI.Coder_decodeStringFromMatWithCorners(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat), IntVector.getCPtr(corners), corners);
+  }
+
 }
