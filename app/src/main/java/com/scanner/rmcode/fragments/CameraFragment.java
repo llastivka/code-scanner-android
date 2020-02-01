@@ -3,11 +3,16 @@ package com.scanner.rmcode.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -15,7 +20,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.scanner.rmcode.MainActivity;
@@ -25,7 +32,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class CameraFragment extends Fragment implements SurfaceHolder.Callback {
+public class CameraFragment extends Fragment implements SurfaceHolder.Callback, BaseFragment {
 
     private static final Logger logger = Logger.getLogger(CameraFragment.class.getName());
 
@@ -36,6 +43,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback {
     SurfaceView cameraView;
     SurfaceHolder surfaceHolder;
     Camera.PictureCallback jpegCallback;
+    View cameraFragmentView;
+
+    Drawable background;
+    Drawable buttonDrawable;
+    ColorStateList accentColor;
 
     private final int CAMERA_REQUEST_CODE = 1;
 
@@ -46,9 +58,14 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback {
         mFragmentActivity = getActivity();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.camera_fragment, container, false);
+        cameraFragmentView = view;
+        setTheme();
+
+        final ProgressBar progressBar = view.findViewById(R.id.camera_progress_bar);
 
         cameraView = view.findViewById(R.id.camera_surface_view);
         surfaceHolder = cameraView.getHolder();
@@ -64,13 +81,16 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback {
         mCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
                 camera.takePicture(null, null, jpegCallback);
+
             }
         });
 
         jpegCallback = new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
+                progressBar.setVisibility(View.GONE);
                 ((MainActivity) mFragmentActivity).setImageBytes(bytes);
                 ((MainActivity) mFragmentActivity).changeFragments(new CaptureFragment(), getString(R.string.code_scanner));
             }
@@ -137,5 +157,26 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback {
             }
 
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void setThemeDetails(Drawable back, Drawable buttonBack, ColorStateList accent) {
+        background = back;
+        buttonDrawable = buttonBack;
+        accentColor = accent;
+
+        if (cameraFragmentView != null) {
+            setTheme();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void setTheme() {
+        cameraFragmentView.setBackground(background);
+        ImageButton captureButton = cameraFragmentView.findViewById(R.id.capture_button);
+        captureButton.setBackground(buttonDrawable);
+        captureButton.setImageTintList(accentColor);
     }
 }

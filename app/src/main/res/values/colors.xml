@@ -15,6 +15,12 @@
     <color name="darkThemeColorSecondaryLight">#f9683a</color>
     <color name="darkThemeColorSecondaryDark">#870000</color>
     <color name="darkThemeColorSecondaryText">#ffffff</color>
+    <color name="darkThemeColorToolbar">#303540</color>
+    <color name="darkThemeColorToolbarLight">#777777</color>
+    <color name="darkThemeColorAccent2">#bfff00</color>
+    <color name="darkThemeColorAccent3">#adff2f</color>
+    <color name="darkThemeColorAccent4">#7cfc00</color>
+    <color name="darkThemeColorAccent">#00ffff</color>
 
     <!-- Dark theme -->
     <color name="lightThemeColorPrimary">#fafafa</color>

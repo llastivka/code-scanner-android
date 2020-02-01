@@ -52,12 +52,36 @@ public class Coder {
     return coder_WrapperJNI.Coder_getModulesNumber(swigCPtr, this);
   }
 
+  public int getModuleSideSize() {
+    return coder_WrapperJNI.Coder_getModuleSideSize(swigCPtr, this);
+  }
+
   public SWIGTYPE_p_cv__Mat encodeStringToMat(String text) {
     return new SWIGTYPE_p_cv__Mat(coder_WrapperJNI.Coder_encodeStringToMat(swigCPtr, this, text), true);
   }
 
   public String decodeStringFromMat(SWIGTYPE_p_cv__Mat mat) {
     return coder_WrapperJNI.Coder_decodeStringFromMat(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat));
+  }
+
+  public SWIGTYPE_p_cv__Mat gradientBrightness(SWIGTYPE_p_cv__Mat image) {
+    return new SWIGTYPE_p_cv__Mat(coder_WrapperJNI.Coder_gradientBrightness(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(image)), true);
+  }
+
+  public int getAverageClosenessToMaxLuminance(int b, int g, int r) {
+    return coder_WrapperJNI.Coder_getAverageClosenessToMaxLuminance(swigCPtr, this, b, g, r);
+  }
+
+  public IntVector getCorners(SWIGTYPE_p_cv__Mat mat) {
+    return new IntVector(coder_WrapperJNI.Coder_getCorners(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat)), true);
+  }
+
+  public String decodeStringFromMatWithCorners(SWIGTYPE_p_cv__Mat mat, IntVector corners) {
+    return coder_WrapperJNI.Coder_decodeStringFromMatWithCorners(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(mat), IntVector.getCPtr(corners), corners);
+  }
+
+  public SWIGTYPE_p_cv__Mat checkPicture(SWIGTYPE_p_cv__Mat image) {
+    return new SWIGTYPE_p_cv__Mat(coder_WrapperJNI.Coder_checkPicture(swigCPtr, this, SWIGTYPE_p_cv__Mat.getCPtr(image)), true);
   }
 
 }

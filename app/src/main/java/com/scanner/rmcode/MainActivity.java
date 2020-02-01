@@ -1,10 +1,16 @@
 package com.scanner.rmcode;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,7 +20,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import com.scanner.rmcode.fragments.BaseFragment;
 import com.scanner.rmcode.fragments.CameraFragment;
 import com.scanner.rmcode.fragments.HistoryFragment;
 import com.scanner.rmcode.fragments.ResultFragment;
@@ -25,9 +33,14 @@ import java.util.logging.Logger;
 public class MainActivity extends AppCompatActivity {
 
     private static final Logger logger = Logger.getLogger(MainActivity.class.getName());
-    private Toolbar toolbar;
     private byte[] imageBytes;
     private String result = null;
+    private boolean darkTheme;
+    Drawable background;
+    Drawable buttonDrawable;
+    ColorStateList accentColor;
+
+    Toolbar toolbar;
 
     SharedPreferences preferences;
 
@@ -39,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("opencv_java3");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,14 +63,13 @@ public class MainActivity extends AppCompatActivity {
         String darkThemePref = getResources().getString(R.string.dark_pref);
 
         String themePreference = preferences.getString(themePrefName, darkThemePref);
-        if (themePreference != null && themePreference.equals(darkThemePref)) {
-            setTheme(R.style.RMDarkTheme);
-        } else {
-            setTheme(R.style.RMLightTheme);
-        }
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        setDarkTheme(themePreference != null && themePreference.equals(darkThemePref));
 
         changeFragments(new CameraFragment(), getString(R.string.code_scanner));
     }
@@ -68,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -86,15 +100,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void changeFragments(Fragment fragment, String toolbarTitle) {
         logger.info("Switching to " + fragment.getClass().getName());
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
         ft.commit();
-        toolbar.setTitle(toolbarTitle);
+
+        TextView title = findViewById(R.id.toolbar_title);
+        title.setText(toolbarTitle);
+        Typeface type = Typeface.createFromAsset(getAssets(),"fonts/Kalam-Regular.ttf");
+        title.setTypeface(type);
+
+        setCurrentThemeDetailsForFragment(fragment);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void changeToResultFragments(String result) {
         setResult(result);
         changeFragments(new ResultFragment(), getString(R.string.code_scanner));
@@ -142,5 +164,33 @@ public class MainActivity extends AppCompatActivity {
 
     public void setPreferences(SharedPreferences preferences) {
         this.preferences = preferences;
+    }
+
+    public boolean isDarkTheme() {
+        return darkTheme;
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void setDarkTheme(boolean darkTheme) {
+        this.darkTheme = darkTheme;
+        if (darkTheme){
+            background = getDrawable(R.drawable.back_grey);
+            buttonDrawable = getDrawable(R.drawable.basic_button);
+            accentColor = getColorStateList(R.color.darkThemeColorAccent4);
+            toolbar.setBackgroundColor(getColor(R.color.darkThemeColorToolbar));
+        } else {
+            background = getDrawable(R.drawable.back_light);
+            buttonDrawable = getDrawable(R.drawable.basic_button_light);
+            accentColor = getColorStateList(R.color.darkThemeColorAccent3);
+            toolbar.setBackgroundColor(getColor(R.color.darkThemeColorToolbarLight));
+        }
+    }
+
+    private void setCurrentThemeDetailsForFragment(Fragment fragment) {
+        if (fragment instanceof BaseFragment && background != null && buttonDrawable != null
+            && accentColor != null) {
+            ((BaseFragment) fragment).setThemeDetails(background, buttonDrawable, accentColor);
+        }
     }
 }

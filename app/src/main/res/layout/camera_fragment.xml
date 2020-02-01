@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/back_grey"
     android:padding="10dp" >
 
     <LinearLayout
@@ -37,6 +38,19 @@
         android:layout_margin="20dp"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/basic_button"/>
+        android:background="@drawable/basic_button"
+        android:tint="@color/darkThemeColorAccent4"/>
+
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/camera_progress_bar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        style="?android:progressBarStyle"
+        android:progressTint="@color/darkThemeColorAccent4"
+        android:visibility="gone"
+        android:indeterminate="true"
+        android:indeterminateDrawable="@drawable/circle"
+        />
 
 </RelativeLayout>

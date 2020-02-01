@@ -11,6 +11,7 @@
 
 namespace std {
     %template(StringVector) vector<string>;
+    %template(IntVector) vector<int>;
 }
 
 

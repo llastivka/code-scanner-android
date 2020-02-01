@@ -19,7 +19,7 @@ public class SWIGTYPE_p_cv__Mat {
     swigCPtr = 0;
   }
 
-  protected static long getCPtr(SWIGTYPE_p_cv__Mat obj) {
+  public static long getCPtr(SWIGTYPE_p_cv__Mat obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 }

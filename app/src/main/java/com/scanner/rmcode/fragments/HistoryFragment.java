@@ -1,5 +1,6 @@
 package com.scanner.rmcode.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -38,7 +40,7 @@ import java.util.logging.Logger;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements BaseFragment {
 
     private static final Logger logger = Logger.getLogger(HistoryFragment.class.getName());
 
@@ -64,7 +66,14 @@ public class HistoryFragment extends Fragment {
     private CheckBox mainDeleteCheckBox;
     private Button deleteCancel;
 
+    View historyFragmentView;
+    Drawable background;
+    Drawable buttonDrawable;
+    ColorStateList accentColor;
+
     private List<HistoryRecord> historyList;
+
+    Typeface type;
 
     @Override
     public void onAttach(Context context) {
@@ -78,6 +87,11 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.history_fragment, container, false);
+        historyFragmentView = view;
+        setTheme();
+
+        type = Typeface.createFromAsset(mContext.getAssets(),"fonts/Kalam-Regular.ttf");
+        setFonts(view);
 
         scale = mContext.getResources().getDisplayMetrics().density;
         setTableColumnsScaleParams();
@@ -122,6 +136,7 @@ public class HistoryFragment extends Fragment {
         return view;
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void buildHistoryTable(List<HistoryRecord> historyList) {
         logger.info("Building of history table has started. Number of records: " + historyList.size());
@@ -142,12 +157,14 @@ public class HistoryFragment extends Fragment {
             row.setMinimumHeight(rowMinHeight);
 
             TextView date = new TextView(mFragmentActivity);
+            date.setTypeface(type);
             date.setLayoutParams(dateParams);
             date.getLayoutParams().width = (int) (80 * scale + 0.5f);
             date.setText(record.getDate());
             row.addView(date);
 
             TextView message = new TextView(mFragmentActivity);
+            message.setTypeface(type);
             message.setLayoutParams(messageParams);
             String notes = record.getNotes();
             String recordText = notes != null && !notes.isEmpty() ? notes : record.getMessage();
@@ -180,6 +197,7 @@ public class HistoryFragment extends Fragment {
         logger.info("Building of history table has ended");
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private TableRow generateTableHeader() {
         int rowMinHeight = (int) (55 * scale + 0.5f);
@@ -192,27 +210,27 @@ public class HistoryFragment extends Fragment {
         dateHeader.setLayoutParams(dateParams);
         dateHeader.getLayoutParams().width = (int) (90 * scale + 0.5f);
         dateHeader.setText(getString(R.string.date_header));
-        dateHeader.setTypeface(null, Typeface.BOLD);
+        dateHeader.setTypeface(type, Typeface.BOLD);
         head.addView(dateHeader);
 
         TextView messageHeader = new TextView(mFragmentActivity);
         messageHeader.setLayoutParams(messageParams);
         messageHeader.setText(getString(R.string.message_header));
-        messageHeader.setTypeface(null, Typeface.BOLD);
+        messageHeader.setTypeface(type, Typeface.BOLD);
         head.addView(messageHeader);
 
         editHeader = new TextView(mFragmentActivity);
         editHeader.setLayoutParams(editParams);
         editHeader.getLayoutParams().width = (int) (50 * scale + 0.5f);
         editHeader.setText(getString(R.string.edit_header));
-        editHeader.setTypeface(null, Typeface.BOLD);
+        editHeader.setTypeface(type, Typeface.BOLD);
 
         mainDeleteCheckBox = new CheckBox(mContext);
         mainDeleteCheckBox.setLayoutParams(editParams);
         mainDeleteCheckBox.getLayoutParams().width = (int) (50 * scale + 0.5f);
-        mainDeleteCheckBox.setButtonTintList(ColorStateList.valueOf(Color.parseColor("#CC0000")));
+        mainDeleteCheckBox.setButtonTintList(accentColor);
         mainDeleteCheckBox.setVisibility(View.GONE);
-        mainDeleteCheckBox.setHighlightColor(Color.argb(100, 255, 0, 0));
+        mainDeleteCheckBox.setHighlightColor(accentColor.getDefaultColor());
         mainDeleteCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -254,9 +272,11 @@ public class HistoryFragment extends Fragment {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private ImageButton getEditButton(final HistoryRecord historyRecord) {
         ImageButton editBtn = new ImageButton(mFragmentActivity);
         editBtn.setImageResource(android.R.drawable.ic_menu_edit);
+        editBtn.setBackground(mContext.getDrawable(R.drawable.basic_button));
 
         editBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -274,6 +294,7 @@ public class HistoryFragment extends Fragment {
             private View getViewWithData() {
                 LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
                 final View view = inflater.inflate(R.layout.edit_popup_fragment, null);
+                setEditFonts(view);
 
                 TextView date = view.findViewById(R.id.edit_popup_date);
                 date.setText(historyRecord.getDate());
@@ -296,6 +317,7 @@ public class HistoryFragment extends Fragment {
                         reloadFragment();
                     }
                 });
+                ok.setBackground(buttonDrawable);
 
                 Button cancel = view.findViewById(R.id.edit_popup_cancel);
                 cancel.setOnClickListener(new View.OnClickListener() {
@@ -304,6 +326,7 @@ public class HistoryFragment extends Fragment {
                         editPopup.cancel();
                     }
                 });
+                cancel.setBackground(buttonDrawable);
 
                 return view;
             }
@@ -317,6 +340,7 @@ public class HistoryFragment extends Fragment {
         return editBtn;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     CheckBox getDeleteCheckBox(final HistoryRecord historyRecord) {
         CheckBox checkBox = new CheckBox(mContext);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -338,6 +362,7 @@ public class HistoryFragment extends Fragment {
         });
         checkBox.setLayoutParams(editParams);
         checkBox.setVisibility(View.GONE);
+        checkBox.setButtonTintList(accentColor);
         return checkBox;
     }
 
@@ -405,5 +430,66 @@ public class HistoryFragment extends Fragment {
             }
             ft.detach(this).attach(this).commit();
         }
+    }
+
+    private void setFonts(View view) {
+        TextView noHistoryMessage = view.findViewById(R.id.no_history_text);
+        noHistoryMessage.setTypeface(type);
+
+        Button deleteButton = view.findViewById(R.id.history_delete);
+        deleteButton.setTypeface(type);
+
+        Button cancelButton = view.findViewById(R.id.history_delete_cancel);
+        cancelButton.setTypeface(type);
+    }
+
+    private void setEditFonts(View view) {
+        TextView editDateLabel = view.findViewById(R.id.history_edit_date_label);
+        editDateLabel.setTypeface(type);
+
+        TextView editDate = view.findViewById(R.id.edit_popup_date);
+        editDate.setTypeface(type);
+
+        TextView editMessageLabel = view.findViewById(R.id.history_edit_message_label);
+        editMessageLabel.setTypeface(type);
+
+        TextView editMessage = view.findViewById(R.id.edit_popup_message);
+        editMessage.setTypeface(type);
+
+        TextView editNotesLabel = view.findViewById(R.id.history_edit_notes_label);
+        editNotesLabel.setTypeface(type);
+
+        EditText editNotes = view.findViewById(R.id.edit_popup_notes);
+        editNotes.setTypeface(type);
+
+        Button okButton = view.findViewById(R.id.edit_popup_ok);
+        okButton.setTypeface(type);
+
+        Button cancelButton = view.findViewById(R.id.edit_popup_cancel);
+        cancelButton.setTypeface(type);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void setThemeDetails(Drawable back, Drawable buttonBack, ColorStateList accent) {
+        background = back;
+        buttonDrawable = buttonBack;
+        accentColor = accent;
+
+        if (historyFragmentView != null) {
+            setTheme();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void setTheme() {
+        historyFragmentView.setBackground(background);
+
+        Button deleteButton = historyFragmentView.findViewById(R.id.history_delete);
+        deleteButton.setBackground(buttonDrawable);
+
+        Button deleteCancelButton = historyFragmentView.findViewById(R.id.history_delete_cancel);
+        deleteCancelButton.setBackground(buttonDrawable);
     }
 }

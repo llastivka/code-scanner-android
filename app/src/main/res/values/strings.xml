@@ -9,7 +9,7 @@
     <string name="no_result_message">Sorry, we couldn\'t catch that.</string>
     <string name="try_again">Try again</string>
     <string name="angles_message">Please mark the four angles of the code</string>
-    <string name="angles_ready">Angles are ready</string>
+    <string name="angles_ready">Ready</string>
     <string name="share">Share</string>
 
     <string name="no_history">No history yet</string>
